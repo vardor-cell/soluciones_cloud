@@ -8,5 +8,20 @@ services:
     env_file:
       - .env
     volumes:
-      - ${PWD}/db-data/:/var/lib/postgresql/data/
-      - ${PWD}/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${pwd}/db-data/:/var/lib/postgresql/data/
+      - ${pwd}/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - my-network
+    
+  web:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    networks:
+      - my-network
+      
+networks:
+  my-network:
+    driver: bridge
