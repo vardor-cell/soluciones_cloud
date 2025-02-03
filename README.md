@@ -12,7 +12,7 @@ To run the project, follow these steps:
 
 ```sh
 docker-compose up
-
+```sh
 
 ## API Endpoints
 
