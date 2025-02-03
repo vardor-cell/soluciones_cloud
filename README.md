@@ -3,6 +3,8 @@ Repositorio donde van a estar todos los proyectos realizados durante el curso de
 
 ## API Endpoints
 
+You can test all the API with postman going to the following [Postman documentation](https://documenter.getpostman.com/view/39270366/2sAYX3s3qR) 
+
 ### Home
 - **GET /**: Returns a welcome message.
 
