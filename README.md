@@ -12,3 +12,28 @@ To run the project, follow these steps:
 
 ```sh
 docker-compose up
+
+
+## API Endpoints
+
+### Home
+- **GET /**: Returns a welcome message.
+
+### User Management
+- **GET /list_users**: Retrieves a list of all users. Requires a valid token.
+- **POST /usuario**: Creates a new user.
+
+### Authentication
+- **POST /login**: Authenticates a user and returns a token.
+
+### Task Management
+- **GET /usuarios/<id>/tareas**: Retrieves all tasks for a specific user. Requires a valid token.
+- **POST /tareas**: Creates a new task. Requires a valid token.
+- **PUT /tareas/<id>**: Updates the state and text of a task. Requires a valid token.
+- **DELETE /tareas/<id>**: Deletes a task. Requires a valid token.
+- **GET /tareas/<id>**: Retrieves a specific task. Requires a valid token.
+
+### Category Management
+- **POST /categorias**: Creates a new category. Requires a valid token.
+- **GET /categorias**: Retrieves all categories. Requires a valid token.
+- **DELETE /categorias/<id>**: Deletes a category. Requires a valid token.
