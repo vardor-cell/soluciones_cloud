@@ -4,8 +4,10 @@ import db
 import jwt
 import datetime
 from functools import wraps
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = "secretkey"
 
@@ -18,9 +20,6 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get('Authorization') # http://127.0.0.1:5000/route?token=alshfjfjfdklsfj89549834ur
-
-        print("Token is here")
-        print(token)
         
         if not token:
             return jsonify({'message': 'Token is missing!'}), 403
@@ -29,7 +28,7 @@ def token_required(f):
             data = jwt.decode(token, key = app.config['SECRET_KEY'],algorithms='HS256')
 
         except Exception as e:
-            return jsonify({'message': 'Token is invalid!'}), 403
+            return jsonify({'message': 'Token is invalid!'}), 401
         
 
         return f(*args, **kwargs)
@@ -43,7 +42,6 @@ def read():
     query = f"SELECT * FROM usuario;"
     try:
         result = db.read_from_db(query)
-        print(result)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -51,7 +49,6 @@ def read():
 
 #API TO CREATE A NEW USER
 @app.route('/usuario', methods=['POST'])
-@token_required
 def usuario():
     data = request.json
     query = f'INSERT INTO usuario (nombre_usuario, contrasenia, imagen_perfil) VALUES (%s, %s, %s);'
@@ -68,13 +65,9 @@ def login():
     try:
         auth = request.authorization
 
-        print(auth.username)
-        print(auth.password)
-
         if auth:
                 query = f"SELECT * FROM usuario WHERE nombre_usuario = '{str(auth.username)}';"
 
-                print("AAAAAAAAAAAAAAA")
                 result = db.read_from_db(query)
                 
                 if len(result) == 0:
@@ -92,7 +85,7 @@ def login():
                         algorithm='HS256'
                     )
 
-                    return jsonify({'token': token})
+                    return jsonify({'token': token, 'id_usuario': result[0]['id'] })
 
         return make_response(
             'Could not verify!',
@@ -109,7 +102,13 @@ def read_task(id):
     query = f"SELECT * FROM tarea WHERE id_usuario = '{id}';"
     try:
         result = db.read_from_db(query)
-        return jsonify(result)
+
+        for task in result:
+            task['fecha_creacion'] = task['fecha_creacion'].strftime('%Y-%m-%d')
+            task['fecha_tentativa_finalizacion'] = task['fecha_tentativa_finalizacion'].strftime('%Y-%m-%d')
+
+        return jsonify(result), 200
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
@@ -126,7 +125,7 @@ def tareas():
 
     try:
         db.write_to_db(query, params)
-        return jsonify({'message': 'Data inserted successfully!'})
+        return jsonify({'message': 'Data inserted successfully!'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
@@ -151,7 +150,7 @@ def editar_tareas(id):
         
         try:
             db.write_to_db(query)
-            return jsonify({'message': 'Data updated successfully!'})
+            return jsonify({'message': 'Data updated successfully!'}), 200
         
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -162,7 +161,7 @@ def editar_tareas(id):
             query = f"DELETE FROM public.tarea WHERE id = {id}"
             db.write_to_db(query)
 
-            return jsonify({'message': 'Data delete successfully!'})
+            return jsonify({'message': 'Data delete successfully!'}), 200
         
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -171,8 +170,7 @@ def editar_tareas(id):
         query = f"SELECT * FROM public.tarea WHERE id = {id};"
         try:
             result = db.read_from_db(query)
-            print(result)
-            return jsonify(result)
+            return jsonify(result), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
         
@@ -190,7 +188,7 @@ def categorias():
         
         try:
             db.write_to_db(query,params)
-            return jsonify({'message': 'Data inserted successfully!'})
+            return jsonify({'message': 'Data inserted successfully!'}), 200
         
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -200,8 +198,7 @@ def categorias():
         query = f"SELECT * FROM categoria;"
         try:
             result = db.read_from_db(query)
-            print(result)
-            return jsonify(result)
+            return jsonify(result), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
         
@@ -216,7 +213,7 @@ def delete_categorias(id):
             query = f"DELETE FROM public.categoria WHERE id = {id}"
             db.write_to_db(query)
 
-            return jsonify({'message': 'Data delete successfully!'})
+            return jsonify({'message': 'Data delete successfully!'}), 200
         
         except Exception as e:
             return jsonify({'error': str(e)}), 500
